@@ -24,10 +24,6 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public List<Crypto> getDescSortedByNormalizedRangeCryptoList() {
-        return getDescSortedByNormalizedRangeCryptoList(null);
-    }
-
-    public List<Crypto> getDescSortedByNormalizedRangeCryptoList(LocalDate searchDate) {
         Map<Crypto, BigDecimal> cryptoMap = Arrays.stream(Crypto.values())
                 .collect(Collectors.toMap(Function.identity(), this::getNormalizedRange));
 
@@ -40,11 +36,11 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public BigDecimal getNewestValue(Crypto crypto) {
-        return getNewestValue(crypto, null);
+        return getNewestValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getNewestValue(Crypto crypto, LocalDate searchDate) {
-        return getCryptoDTOStream(crypto, searchDate)
+    public BigDecimal getNewestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+        return getCryptoDTOStream(data, crypto, searchDate)
                 .max(Comparator.comparing(CryptoDTO::getTimestamp))
                 .orElseThrow() // todo add custom exception
                 .getPrice();
@@ -52,11 +48,11 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public BigDecimal getOldestValue(Crypto crypto) {
-        return getOldestValue(crypto, null);
+        return getOldestValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getOldestValue(Crypto crypto, LocalDate searchDate) {
-        return getCryptoDTOStream(crypto, searchDate)
+    public BigDecimal getOldestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+        return getCryptoDTOStream(data, crypto, searchDate)
                 .min(Comparator.comparing(CryptoDTO::getTimestamp))
                 .orElseThrow() // todo add custom exception
                 .getPrice();
@@ -64,11 +60,11 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public BigDecimal getMinValue(Crypto crypto) {
-        return getMinValue(crypto, null);
+        return getMinValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getMinValue(Crypto crypto, LocalDate searchDate) {
-        return getCryptoDTOStream(crypto, searchDate)
+    public BigDecimal getMinValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+        return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .min(Comparator.naturalOrder())
                 .orElseThrow(); // todo add custom exception
@@ -76,20 +72,20 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public BigDecimal getMaxValue(Crypto crypto) {
-        return getMaxValue(crypto, null);
+        return getMaxValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getMaxValue(Crypto crypto, LocalDate searchDate) {
-        return getCryptoDTOStream(crypto, searchDate)
+    public BigDecimal getMaxValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+        return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .max(Comparator.naturalOrder())
                 .orElseThrow(); // todo add custom exception
     }
 
     @Override
-    public Crypto getHighestNormalizedRangeByDay(LocalDate date) { // todo implement
+    public Crypto getHighestNormalizedRangeByDay(LocalDate date) {
         Map<Crypto, BigDecimal> cryptoMap = Arrays.stream(Crypto.values())
-                .collect(Collectors.toMap(Function.identity(), crypto -> getNormalizedRange(crypto, date)));
+                .collect(Collectors.toMap(Function.identity(), crypto -> getNormalizedRange(getStoredData(), crypto, date)));
 
         return cryptoMap.entrySet()
                 .stream()
@@ -99,9 +95,25 @@ public class CryptoServiceImpl implements CryptoService {
                 .orElseThrow(); // todo add custom exception
     }
 
+    @Override
+    public Map<Crypto, BigDecimal> getCryptoNormalizedRange(Map<Crypto, List<CryptoDTO>> cryptoDTOS) {
+        Map<Crypto, BigDecimal> map = new EnumMap<>(Crypto.class);
+        Crypto key = cryptoDTOS.keySet().stream().findFirst().orElseThrow();
+        map.put(key, getNormalizedRange(cryptoDTOS, key, null));
+        return map;
+    }
 
-    private Stream<CryptoDTO> getCryptoDTOStream(Crypto crypto, LocalDate searchDate) {
-        Stream<CryptoDTO> cryptoDTOStream = dataStorageService.getCryptoData().get(crypto).stream();
+
+    private Map<Crypto, List<CryptoDTO>> getStoredData() {
+        return dataStorageService.getStoredData();
+    }
+
+    private Map<Crypto, List<CryptoDTO>> getUploadedData() {
+        return dataStorageService.getUploadedData();
+    }
+
+    private Stream<CryptoDTO> getCryptoDTOStream(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+        Stream<CryptoDTO> cryptoDTOStream = data.get(crypto).stream();
         return searchDate == null
                 ? cryptoDTOStream
                 : cryptoDTOStream.filter(cryptoDTO -> isSearchDate(cryptoDTO, searchDate));
@@ -113,12 +125,12 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     private BigDecimal getNormalizedRange(Crypto crypto) {
-        return getNormalizedRange(crypto, null);
+        return getNormalizedRange(getStoredData(), crypto, null);
     }
 
-    private BigDecimal getNormalizedRange(Crypto crypto, LocalDate date) {
-        BigDecimal max = getMaxValue(crypto, date);
-        BigDecimal min = getMinValue(crypto, date);
+    private BigDecimal getNormalizedRange(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+        BigDecimal max = getMaxValue(data, crypto, searchDate);
+        BigDecimal min = getMinValue(data, crypto, searchDate);
         return max.subtract(min).divide(min, MathContext.DECIMAL128);
     }
 
