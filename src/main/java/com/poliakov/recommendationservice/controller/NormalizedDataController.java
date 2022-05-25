@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -32,26 +31,14 @@ public class NormalizedDataController {
 
     @GetMapping("/normalized/highest/{date}")
     public Crypto getHighestNormalizedCryptoByDate(@PathVariable String date) {
-        try {
-            LocalDate localDate = LocalDate.parse(date);
-            return cryptoService.getHighestNormalizedRangeByDay(localDate);
-        } catch (DateTimeParseException e) {
-            throw new DateTimeParseException(e.getMessage(), e.getParsedString(), e.getErrorIndex());
-        }
+        LocalDate localDate = LocalDate.parse(date);
+        return cryptoService.getHighestNormalizedRangeByDay(localDate);
     }
 
     @PostMapping("/normalized/highest/upload")
-    public Map<Crypto, BigDecimal> getNormalizedRange(@RequestParam("file") MultipartFile file) {
-        try {
-            dataStorageService.saveUploadedData(file);
-            return cryptoService.getCryptoNormalizedRange(dataStorageService.getUploadedData());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null; // todo handle it
+    public Map<Crypto, BigDecimal> getNormalizedRange(@RequestParam("file") MultipartFile file) throws IOException {
+        dataStorageService.saveUploadedData(file);
+        return cryptoService.getCryptoNormalizedRange(dataStorageService.getUploadedData());
     }
 
-    private LocalDate parseDate(String date) {
-        return null;
-    }
 }

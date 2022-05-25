@@ -1,6 +1,7 @@
 package com.poliakov.recommendationservice.controller;
 
 import com.poliakov.recommendationservice.dto.Crypto;
+import com.poliakov.recommendationservice.exception.UnsupportedValueException;
 import com.poliakov.recommendationservice.service.CryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +40,11 @@ public class CryptoController {
 
 
     private Crypto getCrypto(String crypto) {
-        return Crypto.valueOf(crypto.toUpperCase());
+        try {
+            return Crypto.valueOf(crypto.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedValueException(e.getMessage());
+        }
     }
 
 }

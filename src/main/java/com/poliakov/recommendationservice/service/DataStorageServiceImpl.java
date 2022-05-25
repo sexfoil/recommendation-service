@@ -1,7 +1,9 @@
 package com.poliakov.recommendationservice.service;
 
+import com.opencsv.exceptions.CsvException;
 import com.poliakov.recommendationservice.dto.Crypto;
 import com.poliakov.recommendationservice.dto.CryptoDTO;
+import com.poliakov.recommendationservice.exception.InvalidDataException;
 import com.poliakov.recommendationservice.utils.FilesReaderUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +23,7 @@ public class DataStorageServiceImpl implements DataStorageService {
     private Map<Crypto, List<CryptoDTO>> cryptosStored;
     private Map<Crypto, List<CryptoDTO>> cryptosUploaded;
 
+    // TODO logger
 
     @PostConstruct
     public void initData() {
@@ -48,11 +51,15 @@ public class DataStorageServiceImpl implements DataStorageService {
     }
 
     @Override
-    public void saveUploadedData(MultipartFile file) throws IOException {
+    public void saveUploadedData(MultipartFile file) throws InvalidDataException, IOException {
         cryptosUploaded = new EnumMap<>(Crypto.class);
-        List<CryptoDTO> values = FilesReaderUtils.getDataFromFile(file.getInputStream());
-        Crypto key = values.get(0).getSymbol();
-        cryptosUploaded.put(key, values);
+        try {
+            List<CryptoDTO> values = FilesReaderUtils.getDataFromFile(file.getInputStream());
+            Crypto key = values.get(0).getSymbol();
+            cryptosUploaded.put(key, values);
+        } catch (RuntimeException e) {
+            throw new InvalidDataException(e.getMessage());
+        }
     }
 
 }
