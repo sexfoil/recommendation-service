@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public class CryptoServiceImpl implements CryptoService {
 
     @Autowired
-    DataStorageService dataStorageService;
+    private DataStorageService dataStorageService;
 
 
     @Override
