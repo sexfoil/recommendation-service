@@ -38,7 +38,7 @@ public class NormalizedDataController {
     @PostMapping("/normalized/highest/upload")
     public Map<Crypto, BigDecimal> getNormalizedRange(@RequestParam("file") MultipartFile file) throws IOException {
         dataStorageService.saveUploadedData(file);
-        return cryptoService.getCryptoNormalizedRange(dataStorageService.getUploadedData());
+        return cryptoService.getCryptoNormalizedRange();
     }
 
 }

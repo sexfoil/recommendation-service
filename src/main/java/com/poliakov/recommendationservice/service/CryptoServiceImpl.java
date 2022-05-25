@@ -2,6 +2,7 @@ package com.poliakov.recommendationservice.service;
 
 import com.poliakov.recommendationservice.dto.Crypto;
 import com.poliakov.recommendationservice.dto.CryptoDTO;
+import com.poliakov.recommendationservice.exception.NoValuesException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ public class CryptoServiceImpl implements CryptoService {
     public BigDecimal getNewestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .max(Comparator.comparing(CryptoDTO::getTimestamp))
-                .orElseThrow() // todo add custom exception
+                .orElseThrow(NoValuesException::new)
                 .getPrice();
     }
 
@@ -54,7 +55,7 @@ public class CryptoServiceImpl implements CryptoService {
     public BigDecimal getOldestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .min(Comparator.comparing(CryptoDTO::getTimestamp))
-                .orElseThrow() // todo add custom exception
+                .orElseThrow(NoValuesException::new)
                 .getPrice();
     }
 
@@ -67,7 +68,7 @@ public class CryptoServiceImpl implements CryptoService {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .min(Comparator.naturalOrder())
-                .orElseThrow(); // todo add custom exception
+                .orElseThrow(NoValuesException::new);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class CryptoServiceImpl implements CryptoService {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .max(Comparator.naturalOrder())
-                .orElseThrow(); // todo add custom exception
+                .orElseThrow(NoValuesException::new);
     }
 
     @Override
@@ -92,14 +93,14 @@ public class CryptoServiceImpl implements CryptoService {
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElseThrow(); // todo add custom exception
+                .orElseThrow(NoValuesException::new);
     }
 
     @Override
-    public Map<Crypto, BigDecimal> getCryptoNormalizedRange(Map<Crypto, List<CryptoDTO>> cryptoDTOS) {
+    public Map<Crypto, BigDecimal> getCryptoNormalizedRange() {
         Map<Crypto, BigDecimal> map = new EnumMap<>(Crypto.class);
-        Crypto key = cryptoDTOS.keySet().stream().findFirst().orElseThrow();
-        map.put(key, getNormalizedRange(cryptoDTOS, key, null));
+        Crypto key = getUploadedData().keySet().stream().findFirst().orElseThrow();
+        map.put(key, getNormalizedRange(getUploadedData(), key, null));
         return map;
     }
 

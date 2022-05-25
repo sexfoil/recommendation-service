@@ -22,6 +22,6 @@ public interface CryptoService {
 
     Crypto getHighestNormalizedRangeByDay(LocalDate searchDate);
 
-    Map<Crypto, BigDecimal> getCryptoNormalizedRange(Map<Crypto, List<CryptoDTO>> cryptoDTOS);
+    Map<Crypto, BigDecimal> getCryptoNormalizedRange();
 
 }

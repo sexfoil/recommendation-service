@@ -1,4 +1,4 @@
-package com.poliakov.recommendationservice.exception;
+package com.poliakov.recommendationservice.exception.handlers;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
