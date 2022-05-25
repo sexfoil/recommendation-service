@@ -3,6 +3,8 @@ package com.poliakov.recommendationservice.exception.handlers;
 import com.poliakov.recommendationservice.exception.InvalidDataException;
 import com.poliakov.recommendationservice.exception.NoValuesException;
 import com.poliakov.recommendationservice.exception.UnsupportedValueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.io.IOException;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @ControllerAdvice
@@ -24,6 +27,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String EMPTY_DATA = "NO_VALUES_IN_RANGE";
     private static final String BAD_CSV = "INVALID_CSV_FILE";
 
+    private final Logger logger = LoggerFactory.getLogger(AppExceptionHandler.class);
 
     @ExceptionHandler(DateTimeParseException.class)
     public final ResponseEntity<ErrorResponse> handleDateTimeParseException(DateTimeParseException ex, WebRequest request) {
@@ -53,6 +57,9 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     private ErrorResponse getErrorResponse(String message, Throwable ex) {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
+
+        logger.error(String.format("Error: %s, cause: %s", message, Arrays.toString(details.toArray())));
+
         return new ErrorResponse(message, details);
     }
 }
