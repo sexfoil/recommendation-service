@@ -132,7 +132,7 @@ public class CryptoServiceImpl implements CryptoService {
     private BigDecimal getNormalizedRange(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         BigDecimal max = getMaxValue(data, crypto, searchDate);
         BigDecimal min = getMinValue(data, crypto, searchDate);
-        return max.subtract(min).divide(min, MathContext.DECIMAL128);
+        return max.subtract(min).divide(min, MathContext.DECIMAL32);
     }
 
 }
