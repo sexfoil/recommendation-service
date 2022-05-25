@@ -1,7 +1,7 @@
 package com.poliakov.recommendationservice.service;
 
-import com.poliakov.recommendationservice.model.Crypto;
-import com.poliakov.recommendationservice.model.CryptoDTO;
+import com.poliakov.recommendationservice.dto.Crypto;
+import com.poliakov.recommendationservice.dto.CryptoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

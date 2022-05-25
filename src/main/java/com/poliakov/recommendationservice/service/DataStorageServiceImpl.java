@@ -1,7 +1,7 @@
 package com.poliakov.recommendationservice.service;
 
-import com.poliakov.recommendationservice.model.Crypto;
-import com.poliakov.recommendationservice.model.CryptoDTO;
+import com.poliakov.recommendationservice.dto.Crypto;
+import com.poliakov.recommendationservice.dto.CryptoDTO;
 import com.poliakov.recommendationservice.utils.FilesReaderUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

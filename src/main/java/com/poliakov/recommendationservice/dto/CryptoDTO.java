@@ -1,4 +1,4 @@
-package com.poliakov.recommendationservice.model;
+package com.poliakov.recommendationservice.dto;
 
 import com.opencsv.bean.CsvBindByName;
 import lombok.Data;

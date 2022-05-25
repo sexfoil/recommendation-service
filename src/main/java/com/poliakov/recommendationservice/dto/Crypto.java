@@ -1,4 +1,4 @@
-package com.poliakov.recommendationservice.model;
+package com.poliakov.recommendationservice.dto;
 
 public enum Crypto {
     BTC, DOGE, ETH, LTC, XRP

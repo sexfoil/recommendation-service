@@ -1,6 +1,6 @@
 package com.poliakov.recommendationservice.controller;
 
-import com.poliakov.recommendationservice.model.Crypto;
+import com.poliakov.recommendationservice.dto.Crypto;
 import com.poliakov.recommendationservice.service.CryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

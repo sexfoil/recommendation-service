@@ -1,6 +1,6 @@
 package com.poliakov.recommendationservice.controller;
 
-import com.poliakov.recommendationservice.model.Crypto;
+import com.poliakov.recommendationservice.dto.Crypto;
 import com.poliakov.recommendationservice.service.CryptoService;
 import com.poliakov.recommendationservice.service.DataStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class NormalizedDataController {
             LocalDate localDate = LocalDate.parse(date);
             return cryptoService.getHighestNormalizedRangeByDay(localDate);
         } catch (DateTimeParseException e) {
-            return null; // todo handle it
+            throw new DateTimeParseException(e.getMessage(), e.getParsedString(), e.getErrorIndex());
         }
     }
 

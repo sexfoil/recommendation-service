@@ -1,7 +1,7 @@
 package com.poliakov.recommendationservice.utils;
 
 import com.opencsv.bean.CsvToBeanBuilder;
-import com.poliakov.recommendationservice.model.CryptoDTO;
+import com.poliakov.recommendationservice.dto.CryptoDTO;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
