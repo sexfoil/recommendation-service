@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CryptoService {
 
-    List<Crypto> getSortedCryptosDesc();
+    List<Crypto> getDescSortedByNormalizedRangeCryptoList();
 
     BigDecimal getNewestValue(Crypto crypto);
 
