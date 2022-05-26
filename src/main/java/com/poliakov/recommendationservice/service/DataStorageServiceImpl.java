@@ -3,6 +3,7 @@ package com.poliakov.recommendationservice.service;
 import com.poliakov.recommendationservice.dto.Crypto;
 import com.poliakov.recommendationservice.dto.CryptoDTO;
 import com.poliakov.recommendationservice.exception.InvalidDataException;
+import com.poliakov.recommendationservice.exception.NoValuesException;
 import com.poliakov.recommendationservice.utils.FilesReaderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,19 @@ public class DataStorageServiceImpl implements DataStorageService {
     @Value("${src.files.extension}")
     private String fileExtension;
 
+    /**
+     * Map of stored data of cryptos from resource files
+     */
     private Map<Crypto, List<CryptoDTO>> cryptosStored;
+
+    /**
+     * Map of stored data of cryptos from uploaded file
+     */
     private Map<Crypto, List<CryptoDTO>> cryptosUploaded;
 
+
     private final Logger logger = LoggerFactory.getLogger(DataStorageServiceImpl.class);
+
 
     @PostConstruct
     public void initData() {
@@ -64,6 +74,12 @@ public class DataStorageServiceImpl implements DataStorageService {
         return cryptosUploaded;
     }
 
+    /**
+     *  Saves a data from provided file
+     *
+     * @param   file the specified multipart files
+     * @throws InvalidDataException if incorrect file or file with incorrect structure provided
+     */
     @Override
     public void saveUploadedData(MultipartFile file) throws InvalidDataException, IOException {
         cryptosUploaded = new EnumMap<>(Crypto.class);
