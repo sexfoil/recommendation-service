@@ -40,7 +40,7 @@ public class CryptoServiceImpl implements CryptoService {
         return getNewestValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getNewestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    private BigDecimal getNewestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .max(Comparator.comparing(CryptoDTO::getTimestamp))
                 .orElseThrow(NoValuesException::new)
@@ -52,7 +52,7 @@ public class CryptoServiceImpl implements CryptoService {
         return getOldestValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getOldestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    private BigDecimal getOldestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .min(Comparator.comparing(CryptoDTO::getTimestamp))
                 .orElseThrow(NoValuesException::new)
@@ -64,7 +64,7 @@ public class CryptoServiceImpl implements CryptoService {
         return getMinValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getMinValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    private BigDecimal getMinValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .min(Comparator.naturalOrder())
@@ -76,7 +76,7 @@ public class CryptoServiceImpl implements CryptoService {
         return getMaxValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getMaxValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    private BigDecimal getMaxValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .max(Comparator.naturalOrder())
@@ -99,7 +99,7 @@ public class CryptoServiceImpl implements CryptoService {
     @Override
     public Map<Crypto, BigDecimal> getCryptoNormalizedRange() {
         Map<Crypto, BigDecimal> map = new EnumMap<>(Crypto.class);
-        Crypto key = getUploadedData().keySet().stream().findFirst().orElseThrow();
+        Crypto key = getUploadedData().keySet().stream().findFirst().orElseThrow(NoValuesException::new);
         map.put(key, getNormalizedRange(getUploadedData(), key, null));
         return map;
     }

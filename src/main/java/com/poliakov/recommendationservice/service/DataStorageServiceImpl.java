@@ -6,6 +6,8 @@ import com.poliakov.recommendationservice.exception.InvalidDataException;
 import com.poliakov.recommendationservice.utils.FilesReaderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,11 +17,18 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+@PropertySource("classpath:resource.properties")
 @Service
 public class DataStorageServiceImpl implements DataStorageService {
 
-    private static final String PATH_PREFIX = "prices/";
-    private static final String PATH_SUFFIX = "_values.csv";
+    @Value("${src.files.folder}")
+    private String srcFolder;
+
+    @Value("${src.files.pattern}")
+    private String filePattern;
+
+    @Value("${src.files.extension}")
+    private String fileExtension;
 
     private Map<Crypto, List<CryptoDTO>> cryptosStored;
     private Map<Crypto, List<CryptoDTO>> cryptosUploaded;
@@ -31,12 +40,13 @@ public class DataStorageServiceImpl implements DataStorageService {
         cryptosStored = new EnumMap<>(Crypto.class);
         try {
             for (Crypto crypto : Crypto.values()) {
-                String path = PATH_PREFIX.concat(crypto.name()).concat(PATH_SUFFIX);
+                String filename = crypto.name().concat(filePattern).concat(".").concat(fileExtension);
+                String path = srcFolder.concat("/").concat(filename);
                 List<CryptoDTO> values = FilesReaderUtils.getDataFromResource(path);
                 cryptosStored.put(crypto, values);
 
                 logger.info(String.format("Read data from '%s' file. Successfully stored values for %s",
-                        crypto.name().concat(PATH_SUFFIX), crypto.name()));
+                        crypto.name().concat(filename), crypto.name()));
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -30,26 +31,31 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(AppExceptionHandler.class);
 
     @ExceptionHandler(DateTimeParseException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleDateTimeParseException(DateTimeParseException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(INCORRECT_REQUEST, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleIOException(IOException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(IO_EXCEPTION, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidDataException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleInvalidDataException(InvalidDataException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(BAD_CSV, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(UnsupportedValueException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleUnsupportedValueException(UnsupportedValueException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(UNSUPPORTED_VALUE, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(NoValuesException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleNoValuesException(NoValuesException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(EMPTY_DATA, ex), HttpStatus.NOT_FOUND);
     }

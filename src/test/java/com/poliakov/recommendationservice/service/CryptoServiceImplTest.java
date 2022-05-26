@@ -59,22 +59,8 @@ class CryptoServiceImplTest {
     }
 
     @Test
-    void testGetNewestValueWithProvidedDate() {
-        BigDecimal max = cryptoService.getNewestValue(STORED_DATA, BTC, TEST_DATE);
-
-        assertEquals(max, BigDecimal.valueOf(47143.98));
-    }
-
-    @Test
     void testGetOldestValue() {
         BigDecimal max = cryptoService.getOldestValue(BTC);
-
-        assertEquals(max, BigDecimal.valueOf(46813.21));
-    }
-
-    @Test
-    void testGetOldestValueWithProvidedDate() {
-        BigDecimal max = cryptoService.getOldestValue(STORED_DATA, BTC, TEST_DATE);
 
         assertEquals(max, BigDecimal.valueOf(46813.21));
     }
@@ -87,24 +73,10 @@ class CryptoServiceImplTest {
     }
 
     @Test
-    void testGetMinValueWithProvidedDate() {
-        BigDecimal max = cryptoService.getMinValue(STORED_DATA, BTC, TEST_DATE);
-
-        assertEquals(max, BigDecimal.valueOf(46813.21));
-    }
-
-    @Test
     void testGetMaxValue() {
         BigDecimal max = cryptoService.getMaxValue(BTC);
 
         assertEquals(max, BigDecimal.valueOf(48088.61));
-    }
-
-    @Test
-    void testGetMaxValueWithProvidedDate() {
-        BigDecimal max = cryptoService.getMaxValue(STORED_DATA, BTC, TEST_DATE);
-
-        assertEquals(max, BigDecimal.valueOf(47143.98));
     }
 
     @Test
