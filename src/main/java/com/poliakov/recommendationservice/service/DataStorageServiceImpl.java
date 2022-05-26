@@ -1,10 +1,14 @@
 package com.poliakov.recommendationservice.service;
 
-import com.opencsv.exceptions.CsvException;
 import com.poliakov.recommendationservice.dto.Crypto;
 import com.poliakov.recommendationservice.dto.CryptoDTO;
 import com.poliakov.recommendationservice.exception.InvalidDataException;
+import com.poliakov.recommendationservice.exception.NoValuesException;
 import com.poliakov.recommendationservice.utils.FilesReaderUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,29 +18,49 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+@PropertySource("classpath:resource.properties")
 @Service
 public class DataStorageServiceImpl implements DataStorageService {
 
-    private static final String PATH_PREFIX = "prices/";
-    private static final String PATH_SUFFIX = "_values.csv";
+    @Value("${src.files.folder}")
+    private String srcFolder;
 
+    @Value("${src.files.pattern}")
+    private String filePattern;
+
+    @Value("${src.files.extension}")
+    private String fileExtension;
+
+    /**
+     * Map of stored data of cryptos from resource files
+     */
     private Map<Crypto, List<CryptoDTO>> cryptosStored;
+
+    /**
+     * Map of stored data of cryptos from uploaded file
+     */
     private Map<Crypto, List<CryptoDTO>> cryptosUploaded;
 
-    // TODO logger
+
+    private final Logger logger = LoggerFactory.getLogger(DataStorageServiceImpl.class);
+
 
     @PostConstruct
     public void initData() {
         cryptosStored = new EnumMap<>(Crypto.class);
         try {
             for (Crypto crypto : Crypto.values()) {
-                String path = PATH_PREFIX.concat(crypto.name()).concat(PATH_SUFFIX);
+                String filename = crypto.name().concat(filePattern).concat(".").concat(fileExtension);
+                String path = srcFolder.concat("/").concat(filename);
                 List<CryptoDTO> values = FilesReaderUtils.getDataFromResource(path);
                 cryptosStored.put(crypto, values);
+
+                logger.info(String.format("Read data from '%s' file. Successfully stored values for %s",
+                        crypto.name().concat(filename), crypto.name()));
             }
         } catch (IOException e) {
             e.printStackTrace();
-            // todo add logger
+            logger.error(String.format("Can't read data from files. Cause: %s", e.getMessage()));
         }
     }
 
@@ -50,6 +74,12 @@ public class DataStorageServiceImpl implements DataStorageService {
         return cryptosUploaded;
     }
 
+    /**
+     *  Saves a data from provided file
+     *
+     * @param   file the specified multipart files
+     * @throws InvalidDataException if incorrect file or file with incorrect structure provided
+     */
     @Override
     public void saveUploadedData(MultipartFile file) throws InvalidDataException, IOException {
         cryptosUploaded = new EnumMap<>(Crypto.class);
@@ -57,7 +87,13 @@ public class DataStorageServiceImpl implements DataStorageService {
             List<CryptoDTO> values = FilesReaderUtils.getDataFromFile(file.getInputStream());
             Crypto key = values.get(0).getSymbol();
             cryptosUploaded.put(key, values);
+
+            logger.info(String.format("Stored data from uploaded '%s' file. Successfully stored values for %s",
+                    file.getOriginalFilename(), key.name()));
+
         } catch (RuntimeException e) {
+            logger.error("Can't store data from uploaded file.");
+
             throw new InvalidDataException(e.getMessage());
         }
     }

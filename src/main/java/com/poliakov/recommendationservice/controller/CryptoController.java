@@ -3,6 +3,8 @@ package com.poliakov.recommendationservice.controller;
 import com.poliakov.recommendationservice.dto.Crypto;
 import com.poliakov.recommendationservice.exception.UnsupportedValueException;
 import com.poliakov.recommendationservice.service.CryptoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ public class CryptoController {
     @Autowired
     private CryptoService cryptoService;
 
+    private final Logger logger = LoggerFactory.getLogger(CryptoController.class);
 
     @GetMapping("/{crypto}/newest")
     public BigDecimal getNewestValueOfCrypto(@PathVariable String crypto) {
@@ -43,6 +46,7 @@ public class CryptoController {
         try {
             return Crypto.valueOf(crypto.toUpperCase());
         } catch (IllegalArgumentException e) {
+            logger.error(String.format("Unsupported crypto value '%s'", crypto.toUpperCase()));
             throw new UnsupportedValueException(e.getMessage());
         }
     }

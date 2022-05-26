@@ -3,16 +3,20 @@ package com.poliakov.recommendationservice.exception.handlers;
 import com.poliakov.recommendationservice.exception.InvalidDataException;
 import com.poliakov.recommendationservice.exception.NoValuesException;
 import com.poliakov.recommendationservice.exception.UnsupportedValueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.io.IOException;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @ControllerAdvice
@@ -24,28 +28,34 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String EMPTY_DATA = "NO_VALUES_IN_RANGE";
     private static final String BAD_CSV = "INVALID_CSV_FILE";
 
+    private final Logger logger = LoggerFactory.getLogger(AppExceptionHandler.class);
 
     @ExceptionHandler(DateTimeParseException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleDateTimeParseException(DateTimeParseException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(INCORRECT_REQUEST, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleIOException(IOException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(IO_EXCEPTION, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidDataException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleInvalidDataException(InvalidDataException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(BAD_CSV, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(UnsupportedValueException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleUnsupportedValueException(UnsupportedValueException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(UNSUPPORTED_VALUE, ex), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(NoValuesException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public final ResponseEntity<ErrorResponse> handleNoValuesException(NoValuesException ex, WebRequest request) {
         return new ResponseEntity<>(getErrorResponse(EMPTY_DATA, ex), HttpStatus.NOT_FOUND);
     }
@@ -53,6 +63,9 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     private ErrorResponse getErrorResponse(String message, Throwable ex) {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
+
+        logger.error(String.format("Error: %s, cause: %s", message, Arrays.toString(details.toArray())));
+
         return new ErrorResponse(message, details);
     }
 }

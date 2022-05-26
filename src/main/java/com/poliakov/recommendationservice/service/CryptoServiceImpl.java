@@ -22,7 +22,11 @@ public class CryptoServiceImpl implements CryptoService {
     @Autowired
     private DataStorageService dataStorageService;
 
-
+    /**
+     *  Returns a list of crypto descending sorted by normalized range for the month
+     *
+     * @return  the list of {@link Crypto}
+     */
     @Override
     public List<Crypto> getDescSortedByNormalizedRangeCryptoList() {
         Map<Crypto, BigDecimal> cryptoMap = Arrays.stream(Crypto.values())
@@ -35,58 +39,129 @@ public class CryptoServiceImpl implements CryptoService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     *  Returns the newest value of specified crypto for the month
+     *
+     * @param   crypto the specified {@link Crypto}
+     * @return  the newest value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
     @Override
     public BigDecimal getNewestValue(Crypto crypto) {
         return getNewestValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getNewestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    /**
+     *  Returns the newest value of specified crypto for the specified day
+     *
+     * @param   data the map with key is specified {@link Crypto} and values of {@link CryptoDTO}
+     * @param   crypto the specified {@link Crypto}
+     * @param   searchDate the specified day
+     * @return  the newest value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
+    private BigDecimal getNewestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .max(Comparator.comparing(CryptoDTO::getTimestamp))
                 .orElseThrow(NoValuesException::new)
                 .getPrice();
     }
 
+    /**
+     *  Returns the oldest value of specified crypto for the month
+     *
+     * @param   crypto the specified {@link Crypto}
+     * @return  the oldest value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
     @Override
     public BigDecimal getOldestValue(Crypto crypto) {
         return getOldestValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getOldestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    /**
+     *  Returns the oldest value of specified crypto for the specified day
+     *
+     * @param   data the map with key is specified {@link Crypto} and values of {@link CryptoDTO}
+     * @param   crypto the specified {@link Crypto}
+     * @param   searchDate the specified day
+     * @return  the oldest value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
+    private BigDecimal getOldestValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .min(Comparator.comparing(CryptoDTO::getTimestamp))
                 .orElseThrow(NoValuesException::new)
                 .getPrice();
     }
 
+    /**
+     *  Returns a min value of specified crypto for the month
+     *
+     * @param   crypto the specified {@link Crypto}
+     * @return  the min value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
     @Override
     public BigDecimal getMinValue(Crypto crypto) {
         return getMinValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getMinValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    /**
+     *  Returns a min value of specified crypto for the specified day
+     *
+     * @param   data the map with key is specified {@link Crypto} and values of {@link CryptoDTO}
+     * @param   crypto the specified {@link Crypto}
+     * @param   searchDate the specified day
+     * @return  the min value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
+    private BigDecimal getMinValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .min(Comparator.naturalOrder())
                 .orElseThrow(NoValuesException::new);
     }
 
+    /**
+     *  Returns a max value of specified crypto for the month
+     *
+     * @param   crypto the specified {@link Crypto}
+     * @return  the max value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
     @Override
     public BigDecimal getMaxValue(Crypto crypto) {
         return getMaxValue(getStoredData(), crypto, null);
     }
 
-    public BigDecimal getMaxValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
+    /**
+     *  Returns a max value of specified crypto for the specified day
+     *
+     * @param   data the map with key is specified {@link Crypto} and values of {@link CryptoDTO}
+     * @param   crypto the specified {@link Crypto}
+     * @param   searchDate the specified day
+     * @return  the max value {@link BigDecimal}
+     * @throws NoValuesException if no value found
+     */
+    private BigDecimal getMaxValue(Map<Crypto, List<CryptoDTO>> data, Crypto crypto, LocalDate searchDate) {
         return getCryptoDTOStream(data, crypto, searchDate)
                 .map(CryptoDTO::getPrice)
                 .max(Comparator.naturalOrder())
                 .orElseThrow(NoValuesException::new);
     }
 
+    /**
+     *  Returns a crypto with the highest normalized range for the specified day
+     *
+     * @param   searchDate the specified day
+     * @return  the crypto with the highest normalized range
+     * @throws NoValuesException if no value found
+     */
     @Override
-    public Crypto getHighestNormalizedRangeByDay(LocalDate date) {
+    public Crypto getHighestNormalizedRangeByDay(LocalDate searchDate) {
         Map<Crypto, BigDecimal> cryptoMap = Arrays.stream(Crypto.values())
-                .collect(Collectors.toMap(Function.identity(), crypto -> getNormalizedRange(getStoredData(), crypto, date)));
+                .collect(Collectors.toMap(Function.identity(), crypto -> getNormalizedRange(getStoredData(), crypto, searchDate)));
 
         return cryptoMap.entrySet()
                 .stream()
@@ -96,10 +171,16 @@ public class CryptoServiceImpl implements CryptoService {
                 .orElseThrow(NoValuesException::new);
     }
 
+    /**
+     *  Returns a crypto with value of normalized range for the period of time
+     *
+     * @return  the map of crypto with normalized range value
+     * @throws NoValuesException if no value found
+     */
     @Override
     public Map<Crypto, BigDecimal> getCryptoNormalizedRange() {
         Map<Crypto, BigDecimal> map = new EnumMap<>(Crypto.class);
-        Crypto key = getUploadedData().keySet().stream().findFirst().orElseThrow();
+        Crypto key = getUploadedData().keySet().stream().findFirst().orElseThrow(NoValuesException::new);
         map.put(key, getNormalizedRange(getUploadedData(), key, null));
         return map;
     }
